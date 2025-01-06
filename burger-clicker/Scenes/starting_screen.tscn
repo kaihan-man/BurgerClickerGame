@@ -1,0 +1,92 @@
+[gd_scene load_steps=5 format=3 uid="uid://d2nbwfbv6v237"]
+
+[ext_resource type="Texture2D" uid="uid://dldpkmqrjsnf" path="res://Assets/Sprites/BGBurger.png" id="1_qhv65"]
+[ext_resource type="Texture2D" uid="uid://camxrwepgslh6" path="res://Assets/Sprites/burgercopyrighrfreehighres.png" id="2_r7ris"]
+[ext_resource type="AudioStream" uid="uid://cpo6g37lnvn81" path="res://Assets/Sound/cotton-toys-soundroll-main-version-16753-01-17.mp3" id="4_tbqnb"]
+
+[sub_resource type="GDScript" id="GDScript_0ffug"]
+script/source = "extends Button
+
+@onready var burger: Sprite2D = $\"../Burger\"
+@onready var grease_counter: Label = $greaseCounter
+@onready var click_multipler_button: Button = $ClickMultiplerButton
+@onready var click_sound_effect: AudioStreamPlayer2D = $ClickSoundEffect
+
+var rng = RandomNumberGenerator.new()
+
+func _ready() -> void:
+	assert(burger, \"Node 'burger' not found!\")
+	assert(grease_counter, \"Node 'greaseCounter' not found!\")
+	assert(click_multipler_button, \"Node 'ClickMultiplerButton' not found!\")
+	assert(click_sound_effect, \"Node 'ClickSoundEffect' not found!\")
+
+
+
+
+func _on_click_multipler_pressed() -> void:
+	rng.randomize()
+	if Global.greasePoints >= Global.clickPrice:
+		Global.clickMultiplier += 1
+		Global.greasePoints -= Global.clickPrice
+		grease_counter.text = str(round(Global.greasePoints))
+		Global.clickPrice *= rng.randf_range(1.4, 2.1)
+		click_multipler_button.text = \"+1 Grease Point Per Click\\nCost: \" + str(round(Global.clickPrice))
+
+
+func _on_click_button_pressed() -> void:
+	Global.greasePoints += Global.clickMultiplier
+	grease_counter.text = str(round(Global.greasePoints))
+	click_sound_effect.play()
+	burger.scale.x = 0.28
+	burger.scale.y = 0.28
+	await get_tree().create_timer(0.1).timeout
+	burger.scale.x = 0.3
+	burger.scale.y = 0.3
+"
+
+[node name="Starting Screen" type="Node2D"]
+
+[node name="Yellow Background" type="Sprite2D" parent="."]
+z_index = -5
+position = Vector2(447, 53)
+texture = ExtResource("1_qhv65")
+
+[node name="Burger" type="Sprite2D" parent="."]
+z_index = 2
+position = Vector2(887, 309)
+rotation = 0.340339
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("2_r7ris")
+
+[node name="PlayButton" type="Button" parent="."]
+offset_left = 200.0
+offset_top = 272.0
+offset_right = 543.0
+offset_bottom = 379.0
+theme_override_font_sizes/font_size = 70
+text = "Play"
+script = SubResource("GDScript_0ffug")
+
+[node name="QuitButton" type="Button" parent="."]
+offset_left = 200.0
+offset_top = 398.0
+offset_right = 543.0
+offset_bottom = 505.0
+theme_override_font_sizes/font_size = 70
+text = "Quit"
+
+[node name="Title" type="Label" parent="."]
+offset_left = 204.0
+offset_top = -8.0
+offset_right = 537.0
+offset_bottom = 269.0
+theme_override_font_sizes/font_size = 100
+text = "Burger
+Clicker"
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_tbqnb")
+autoplay = true
+
+[connection signal="pressed" from="PlayButton" to="PlayButton" method="_on_pressed"]
+[connection signal="pressed" from="QuitButton" to="PlayButton" method="_on_quit_button_pressed"]
